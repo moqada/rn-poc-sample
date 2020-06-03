@@ -1,12 +1,27 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "jsx": "react-native",
     "lib": ["dom", "esnext"],
+    "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,
+    "paths": {
+      "*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@config/*": ["src/config/*"],
+      "@containers/*": ["src/containers/*"],
+      "@domain/*": ["src/domain/*"],
+      "@infra/*": ["src/infra/*"],
+      "@useCases/*": ["src/useCases/*"],
+    },
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "rootDirs": ["src"],
     "strict": true
   }
 }
