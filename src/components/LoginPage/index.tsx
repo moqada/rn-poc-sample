@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
 });
 
 type Props = {
-  children: never;
+  children?: never;
   initialData:
     | {
         username: string;

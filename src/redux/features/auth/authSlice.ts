@@ -4,8 +4,6 @@ import {AsyncStorage} from 'react-native';
 import {RootState} from 'redux/rootReducer';
 import {AppThunkAPI} from 'redux/store';
 
-import {show, hide} from '../app/indicatorSlice';
-
 const ACCESS_TOKEN_STORE_KEY = 'auth/accessToken';
 
 type AccessTokenResponse = {
@@ -34,9 +32,8 @@ export const login = createAsyncThunk<
   'auth/login',
   async (
     {username, password}: {username: string; password: string},
-    {dispatch, rejectWithValue}
+    {rejectWithValue}
   ) => {
-    dispatch(show());
     const api = new APIClient({});
     try {
       const response = await api.login({username, password});
@@ -44,10 +41,8 @@ export const login = createAsyncThunk<
         ACCESS_TOKEN_STORE_KEY,
         JSON.stringify(response)
       );
-      dispatch(hide());
       return response.data;
     } catch (err) {
-      dispatch(hide());
       if (!err.response) {
         throw err;
       }

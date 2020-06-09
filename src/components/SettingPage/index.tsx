@@ -2,7 +2,7 @@ import React from 'react';
 import {Button} from 'react-native';
 
 type Props = {
-  children: never;
+  children?: never;
   onPressLogout: () => void;
 };
 const SettingPage = ({onPressLogout}: Props) => {

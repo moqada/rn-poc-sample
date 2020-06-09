@@ -5,17 +5,11 @@ import {useSelector, useDispatch} from 'react-redux';
 
 import HomePage from '@components/HomePage';
 import * as routes from '@config/routes';
+import {refreshHomePageUseCase} from '@useCases/app';
+import {createTodoUseCase} from '@useCases/todo';
 
-import {
-  selectors as accountSelectors,
-  fetchUser,
-} from '../../redux/features/account/accountSlice';
-import {
-  selectors as todoSelectors,
-  createTodo,
-} from '../../redux/features/todo/todoSlice';
-
-// import {RefreshHomeUseCase} from '@useCases/app/RefreshHomeUseCase';
+import {selectors as accountSelectors} from '../../redux/features/account/accountSlice';
+import {selectors as todoSelectors} from '../../redux/features/todo/todoSlice';
 
 const ConnectedHomePage = () => {
   const [isRefreshing, setRefreshing] = useState(false);
@@ -29,7 +23,7 @@ const ConnectedHomePage = () => {
   }, [navigation]);
   const onPressAdd = useCallback(
     ({title}: {title: string}) => {
-      dispatch(createTodo({title, checked: false}));
+      dispatch(createTodoUseCase({title, checked: false}));
     },
     [dispatch]
   );
@@ -38,12 +32,12 @@ const ConnectedHomePage = () => {
   }, []);
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await dispatch(fetchUser());
+    await dispatch(refreshHomePageUseCase());
     setRefreshing(false);
   }, [dispatch, setRefreshing]);
 
   useEffect(() => {
-    dispatch(fetchUser());
+    dispatch(refreshHomePageUseCase());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return user ? (

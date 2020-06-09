@@ -62,7 +62,6 @@ const HomePage = ({
   username,
   phoneNumber,
   todos,
-  // todos = [{title: 'hoge'}, {title: 'fuga'}],
   isRefreshing,
   onPressSetting,
   onPressItem,

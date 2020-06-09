@@ -6,9 +6,10 @@ import {Provider} from 'react-redux';
 import Indicator from '@containers/Indicator';
 
 import Navigator from './navigations/Navigator';
-import {initialize} from './redux/features/app/appSlice';
 import store from './redux/store';
-store.dispatch(initialize());
+import {systemInitializeUseCase} from './useCases/app';
+
+store.dispatch(systemInitializeUseCase());
 
 export default function App() {
   return (
