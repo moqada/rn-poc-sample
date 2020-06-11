@@ -22,7 +22,7 @@ export const logoutUseCase = () => {
     dispatch(show());
     const accessToken = selectors.selectAccessToken(getState());
     if (accessToken) {
-      await dispatch(logout({token: accessToken.token}));
+      await dispatch(logout({token: accessToken.id.value}));
     }
     dispatch(hide());
   };
