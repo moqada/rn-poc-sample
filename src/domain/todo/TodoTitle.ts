@@ -1,3 +1,3 @@
-import {ValueObject} from '@domain/lib';
+import {ValueObject} from '@libs/domain';
 
 export class TodoTitle extends ValueObject<string> {}

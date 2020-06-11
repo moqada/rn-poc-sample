@@ -1,5 +1,4 @@
-import {Entity} from '@domain/lib';
-import {Identifier} from '@domain/lib/Identifier';
+import {Entity, Identifier} from '@libs/domain';
 
 import {TodoTitle} from './TodoTitle';
 

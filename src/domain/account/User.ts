@@ -1,5 +1,4 @@
-import {Entity} from '@domain/lib';
-import {Identifier} from '@domain/lib/Identifier';
+import {Entity, Identifier} from '@libs/domain';
 
 import {PhoneNumber} from './PhoneNumber';
 import {Username} from './Username';

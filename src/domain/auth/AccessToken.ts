@@ -1,5 +1,4 @@
-import {Entity} from '../lib/Entity';
-import {Identifier} from '../lib/Identifier';
+import {Entity, Identifier} from '@libs/domain';
 
 export class AccessTokenId extends Identifier<string> {}
 
