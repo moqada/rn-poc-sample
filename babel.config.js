@@ -13,6 +13,7 @@ module.exports = function (api) {
             '@containers': `./src/containers`,
             '@domain': `./src/domain`,
             '@infra': `./src/infra`,
+            '@libs': `./src/libs`,
             '@useCases': `./src/useCases`,
           },
         },
