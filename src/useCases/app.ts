@@ -4,9 +4,13 @@ import {loadAccessToken} from '../redux/features/auth/authSlice';
 import {fetchTodoAll} from '../redux/features/todo/todoSlice';
 import {AppDispatch} from '../redux/store';
 
-export const refreshHomePageUseCase = () => {
+export const refreshHomePageUseCase = ({userOnly}: {userOnly: boolean}) => {
   return async (dispatch: AppDispatch) => {
-    await Promise.all([dispatch(fetchUser()), dispatch(fetchTodoAll())]);
+    const promises: Array<Promise<any>> = [dispatch(fetchUser())];
+    if (!userOnly) {
+      promises.push(dispatch(fetchTodoAll()));
+    }
+    await Promise.all(promises);
   };
 };
 

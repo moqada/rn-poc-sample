@@ -37,15 +37,16 @@ const DUMMY_USER = {
   phoneNumber: '09000000000',
   birthday: '2000-01-02',
 };
-const DUMMY_TODOS = [
-  {
-    id: 'a',
-    title: 'おこめたべる',
+const DUMMY_TODOS = [];
+for (let i = 0; i < 1000; i++) {
+  DUMMY_TODOS.push({
+    id: `a-${i}`,
+    title: `おこめたべる ${i}`,
     checked: false,
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
-  },
-];
+  });
+}
 
 const createAccessToken = (): AccessTokenResource => {
   const createdAt = new Date();
@@ -174,9 +175,9 @@ export class APIClient {
   }
 
   async todoInstances(): Promise<Response<Array<TodoResource>>> {
-    DUMMY_TODOS.push(
-      createTodo({title: `sample+${new Date().getTime()}`, checked: false})
-    );
+    // DUMMY_TODOS.push(
+    //   createTodo({title: `sample+${new Date().getTime()}`, checked: false})
+    // );
     return response({data: DUMMY_TODOS.map((item) => ({...item}))});
   }
 
@@ -208,9 +209,14 @@ export class APIClient {
       await delay(2000);
       throw createErrorResponse({data: {type: 'not_found'}, status: 404});
     }
-    todo.title = title;
-    todo.checked = checked;
-    todo.updatedAt = updatedAt.toISOString();
-    return response({data: todo});
+    const index = DUMMY_TODOS.findIndex((todo) => todo.id === id);
+    const newTodo = {
+      ...todo,
+      title,
+      checked,
+      updatedAt: updatedAt.toISOString(),
+    };
+    DUMMY_TODOS.splice(index, 1, newTodo);
+    return response({data: newTodo});
   }
 }

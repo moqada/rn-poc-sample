@@ -15,7 +15,10 @@ const initialState: AccountState = {
 };
 
 const selectState = (state: RootState): AccountState => state.account;
-const selectUser = createSelector(selectState, (account) => account.user);
+const selectUser = createSelector(selectState, (account) => {
+  console.log('selectUser');
+  return account.user;
+});
 
 export const fetchUser = createAsyncThunk(
   'account/fetchUser',

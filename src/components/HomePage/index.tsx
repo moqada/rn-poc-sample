@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {
   RefreshControl,
   StyleSheet,
@@ -9,6 +9,8 @@ import {
   Button,
   FlatList,
 } from 'react-native';
+
+// import {Todo} from '@domain/todo';
 
 const styles = StyleSheet.create({
   action: {
@@ -39,17 +41,18 @@ const styles = StyleSheet.create({
   },
 });
 
+type Todo = {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  createdAt: Date;
+  checked: boolean;
+};
 type Props = {
   username: string;
   phoneNumber: string;
   isRefreshing: boolean;
-  todos: Array<{
-    id: string;
-    title: string;
-    updatedAt: Date;
-    createdAt: Date;
-    checked: boolean;
-  }>;
+  todos: Array<Todo>;
   children?: never;
   onPressSetting: () => void;
   onPressAdd: (_: {title: string}) => void;
@@ -68,38 +71,41 @@ const HomePage = ({
   onRefresh,
 }: Props) => {
   const [title, setTitle] = useState('');
-  return (
-    <FlatList
-      contentContainerStyle={styles.base}
-      refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-      }
-      data={todos}
-      keyExtractor={(item) => item.id}
-      ListHeaderComponent={
-        <>
-          <View style={styles.section}>
-            <Text style={styles.title}>Account</Text>
-            <View>
-              <Text>username: {username}</Text>
-              <Text>phoneNumber: {phoneNumber}</Text>
-            </View>
-            <Button onPress={onPressSetting} title="Setting" />
+  const keyExtractor = useCallback((item: Todo) => item.id, []);
+  const listHeaderComponent = useMemo(
+    () => (
+      <>
+        <View style={styles.section}>
+          <Text style={styles.title}>Account</Text>
+          <View>
+            <Text>username: {username}</Text>
+            <Text>phoneNumber: {phoneNumber}</Text>
           </View>
-          <View style={styles.section}>
-            <Text style={styles.title}>Todos</Text>
-            <View style={styles.action}>
-              <TextInput
-                style={styles.input}
-                value={title}
-                onChangeText={(val) => setTitle(val)}
-              />
-              <Button onPress={() => onPressAdd({title})} title="Add" />
-            </View>
+          <Button onPress={onPressSetting} title="Setting" />
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.title}>Todos</Text>
+          <View style={styles.action}>
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={(val) => setTitle(val)}
+            />
+            <Button onPress={() => onPressAdd({title})} title="Add" />
           </View>
-        </>
-      }
-      renderItem={({item}) => (
+        </View>
+      </>
+    ),
+    [username, phoneNumber, onPressSetting, title, setTitle, onPressAdd]
+  );
+  const refreshControl = useMemo(
+    () => <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />,
+    [isRefreshing, onRefresh]
+  );
+  const renderItem = useCallback(
+    ({item}: {item: Todo}) => {
+      // console.log('renderItem', item);
+      return (
         <TouchableOpacity
           style={styles.item}
           onPress={() => onPressItem({id: item.id})}
@@ -111,7 +117,18 @@ const HomePage = ({
             </Text>
           </View>
         </TouchableOpacity>
-      )}
+      );
+    },
+    [onPressItem]
+  );
+  return (
+    <FlatList
+      contentContainerStyle={styles.base}
+      refreshControl={refreshControl}
+      data={todos}
+      keyExtractor={keyExtractor}
+      ListHeaderComponent={listHeaderComponent}
+      renderItem={renderItem}
     />
   );
 };

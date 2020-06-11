@@ -29,6 +29,7 @@ const convertResponseToTodoStateEntity = (
   return response;
 };
 const convertStateEntityToTodoEntity = (entity: TodoStateEntity): Todo => {
+  // console.log('convert', entity);
   return new Todo({
     id: new TodoId(entity.id),
     title: new TodoTitle(entity.title),
@@ -38,11 +39,22 @@ const convertStateEntityToTodoEntity = (entity: TodoStateEntity): Todo => {
   });
 };
 
+const performSelectAll = (state) => {
+  const before = performance.now();
+  const ret = adapterSelectors.selectAll(state);
+  // const ret = adapterSelectors
+  //   .selectAll(state)
+  //   .map(convertStateEntityToTodoEntity);
+  console.log('peprformSelectAll', performance.now() - before);
+  return ret;
+};
 const selectTodoState = (state: RootState) => state.todo;
 const adapterSelectors = todoAdapter.getSelectors();
 const selectTodoAll = createSelector(selectTodoState, (state: TodoState) => {
   console.log('call selectTodoAll');
-  return adapterSelectors.selectAll(state).map(convertStateEntityToTodoEntity);
+  // return adapterSelectors.selectAll(state).map(convertStateEntityToTodoEntity);
+  // return adapterSelectors.selectAll(state);
+  return performSelectAll(state);
 });
 const selectTodoById = createSelector(
   selectTodoState,

@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useState, useEffect} from 'react';
+import React, {useMemo, useCallback, useState, useEffect} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 
 import HomePage from '@components/HomePage';
@@ -34,14 +34,24 @@ const ConnectedHomePage = () => {
   );
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await dispatch(refreshHomePageUseCase());
+    await dispatch(refreshHomePageUseCase({userOnly: false}));
     setRefreshing(false);
   }, [dispatch, setRefreshing]);
 
   useEffect(() => {
-    dispatch(refreshHomePageUseCase());
+    dispatch(refreshHomePageUseCase({userOnly: true}));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // const mappedTodos = useMemo(() => {
+  //   console.log('mapping');
+  //   return todos.map((entity) => ({
+  //     id: entity.id.value,
+  //     title: entity.title.value,
+  //     checked: entity.checked,
+  //     updatedAt: entity.updatedAt,
+  //     createdAt: entity.createdAt,
+  //   }));
+  // }, [todos]);
   return user ? (
     <HomePage
       onPressSetting={onPressSetting}
@@ -51,13 +61,7 @@ const ConnectedHomePage = () => {
       isRefreshing={isRefreshing}
       username={user.username}
       phoneNumber={user.phoneNumber}
-      todos={todos.map((entity) => ({
-        id: entity.id.value,
-        title: entity.title.value,
-        checked: entity.checked,
-        updatedAt: entity.updatedAt,
-        createdAt: entity.createdAt,
-      }))}
+      todos={todos}
     />
   ) : null;
 };
