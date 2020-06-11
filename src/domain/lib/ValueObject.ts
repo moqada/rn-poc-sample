@@ -1,11 +1,11 @@
-import assert from 'assert';
+// import assert from 'assert';
 
 import {validate, Validator} from './Validator';
 export abstract class ValueObject<T> {
   static readonly validators: Array<Validator<any, any>>;
-  protected readonly value: T;
+  readonly value: T;
   constructor(value: T) {
-    assert(validate(this.constructor as typeof ValueObject, value) === null);
+    // assert(validate(this.constructor as typeof ValueObject, value) === null);
     this.value = value;
   }
 

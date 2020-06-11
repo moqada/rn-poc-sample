@@ -6,6 +6,7 @@ import * as routes from '@config/routes';
 import HomePage from '@containers/HomePage';
 import LoginPage from '@containers/LoginPage';
 import SettingPage from '@containers/SettingPage';
+import TodoDetailPage from '@containers/TodoDetailPage';
 
 import {selectors} from '../redux/features/auth/authSlice';
 
@@ -19,6 +20,7 @@ const Navigator = () => {
         <>
           <Stack.Screen name={routes.Home} component={HomePage} />
           <Stack.Screen name={routes.Setting} component={SettingPage} />
+          <Stack.Screen name={routes.TodoDetail} component={TodoDetailPage} />
         </>
       ) : (
         <Stack.Screen name={routes.Login} component={LoginPage} />

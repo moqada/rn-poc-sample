@@ -1,6 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
 import React, {useCallback, useState, useEffect} from 'react';
-import {Alert} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 
 import HomePage from '@components/HomePage';
@@ -27,9 +26,12 @@ const ConnectedHomePage = () => {
     },
     [dispatch]
   );
-  const onPressItem = useCallback(({id}: {id: string}) => {
-    Alert.alert(`${id}: まだないよ`);
-  }, []);
+  const onPressItem = useCallback(
+    ({id}: {id: string}) => {
+      navigation.navigate(routes.TodoDetail, {todoId: id});
+    },
+    [navigation]
+  );
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await dispatch(refreshHomePageUseCase());
@@ -49,7 +51,13 @@ const ConnectedHomePage = () => {
       isRefreshing={isRefreshing}
       username={user.username}
       phoneNumber={user.phoneNumber}
-      todos={todos}
+      todos={todos.map((entity) => ({
+        id: entity.id.value,
+        title: entity.title.value,
+        checked: entity.checked,
+        updatedAt: entity.updatedAt,
+        createdAt: entity.createdAt,
+      }))}
     />
   ) : null;
 };

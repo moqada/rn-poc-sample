@@ -4,12 +4,12 @@ type Response<T> = {
   status: number;
 };
 
-type AccessTokenResource = {
+export type AccessTokenResource = {
   createdAt: string;
   token: string;
   expiresIn: number;
 };
-type UserResource = {
+export type UserResource = {
   id: string;
   username: string;
   phoneNumber: string;
@@ -23,7 +23,7 @@ type SignUpRequest = {
   phoneNumber: string;
   birthday: string;
 };
-type TodoResource = {
+export type TodoResource = {
   id: string;
   title: string;
   checked: boolean;
@@ -53,6 +53,23 @@ const createAccessToken = (): AccessTokenResource => {
     token: `DUMMY_TOKEN-${createdAt.getTime()}`,
     expiresIn: 3600,
     createdAt: createdAt.toISOString(),
+  };
+};
+
+const createTodo = ({
+  title,
+  checked,
+}: {
+  title: string;
+  checked: boolean;
+}): TodoResource => {
+  const createdAt = new Date();
+  return {
+    title,
+    checked,
+    id: createdAt.getTime().toString(),
+    createdAt: createdAt.toISOString(),
+    updatedAt: createdAt.toISOString(),
   };
 };
 
@@ -153,11 +170,14 @@ export class APIClient {
       await delay(2000);
       throw createErrorResponse({data: {type: 'not_found'}, status: 404});
     }
-    return response({data: todo});
+    return response({data: {...todo}});
   }
 
   async todoInstances(): Promise<Response<Array<TodoResource>>> {
-    return response({data: DUMMY_TODOS});
+    DUMMY_TODOS.push(
+      createTodo({title: `sample+${new Date().getTime()}`, checked: false})
+    );
+    return response({data: DUMMY_TODOS.map((item) => ({...item}))});
   }
 
   async todoCreate({
@@ -167,14 +187,8 @@ export class APIClient {
     title: string;
     checked: boolean;
   }): Promise<Response<TodoResource>> {
-    const createdAt = new Date();
-    const todo = {
-      title,
-      checked,
-      id: createdAt.getTime().toString(),
-      createdAt: createdAt.toISOString(),
-      updatedAt: createdAt.toISOString(),
-    };
+    const todo = createTodo({title, checked});
+    DUMMY_TODOS.push(todo);
     return response({data: todo});
   }
 

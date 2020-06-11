@@ -1,63 +1,97 @@
-import {APIClient} from '@infra/api/APIClient';
-import {createSlice, createAsyncThunk, createSelector} from '@reduxjs/toolkit';
+import {APIClient, TodoResource} from '@infra/api/APIClient';
+import {
+  createSlice,
+  createAsyncThunk,
+  createSelector,
+  createEntityAdapter,
+} from '@reduxjs/toolkit';
 import {RootState} from 'redux/rootReducer';
+import {AppThunkAPI} from 'redux/store';
 
-type Todo = {
+import {Todo, TodoId, TodoTitle} from '@domain/todo';
+
+type TodoStateEntity = {
   id: string;
   title: string;
   checked: boolean;
   updatedAt: string;
   createdAt: string;
 };
-interface TodoState {
-  items: Array<Todo>;
-}
-
-const initialState: TodoState = {
-  items: [],
+const todoAdapter = createEntityAdapter<TodoStateEntity>();
+const initialState = todoAdapter.getInitialState();
+type TodoState = typeof initialState;
+// const initialState: TodoState = {
+//   items: [],
+// };
+const convertResponseToTodoStateEntity = (
+  response: TodoResource
+): TodoStateEntity => {
+  return response;
+};
+const convertStateEntityToTodoEntity = (entity: TodoStateEntity): Todo => {
+  return new Todo({
+    id: new TodoId(entity.id),
+    title: new TodoTitle(entity.title),
+    checked: entity.checked,
+    createdAt: new Date(entity.createdAt),
+    updatedAt: new Date(entity.updatedAt),
+  });
 };
 
 const selectTodoState = (state: RootState) => state.todo;
-const selectTodoAll = createSelector(selectTodoState, (state) =>
-  state.items.map(({createdAt, updatedAt, ...todo}) => ({
-    ...todo,
-    createdAt: new Date(createdAt),
-    updatedAt: new Date(updatedAt),
-  }))
-);
-
-export const fetchTodoById = createAsyncThunk(
-  'todo/fetchTodo',
-  async ({id}: {id: string}, {rejectWithValue}) => {
-    const api = new APIClient({});
-    try {
-      const response = await api.todoSelf(id);
-      return response.data;
-    } catch (err) {
-      if (!err.response) {
-        throw err;
-      }
-      return rejectWithValue(err.response);
-    }
-  }
-);
-export const fetchTodoAll = createAsyncThunk(
-  'todo/fetchTodoAll',
-  async (_, {rejectWithValue}) => {
-    const api = new APIClient({});
-    try {
-      const response = await api.todoInstances();
-      return response.data;
-    } catch (err) {
-      if (!err.response) {
-        throw err;
-      }
-      return rejectWithValue(err.response);
-    }
+const adapterSelectors = todoAdapter.getSelectors();
+const selectTodoAll = createSelector(selectTodoState, (state: TodoState) => {
+  console.log('call selectTodoAll');
+  return adapterSelectors.selectAll(state).map(convertStateEntityToTodoEntity);
+});
+const selectTodoById = createSelector(
+  selectTodoState,
+  (state: RootState, id: string) => id,
+  (state: TodoState, id: string) => {
+    console.log('call selectTodoById', id);
+    const entity = adapterSelectors.selectById(state, id);
+    return entity && convertStateEntityToTodoEntity(entity);
   }
 );
 
-export const createTodo = createAsyncThunk(
+export const fetchTodoById = createAsyncThunk<
+  TodoStateEntity,
+  {id: string},
+  AppThunkAPI
+>('todo/fetchTodo', async ({id}: {id: string}, {rejectWithValue}) => {
+  const api = new APIClient({});
+  try {
+    const response = await api.todoSelf(id);
+    return convertResponseToTodoStateEntity(response.data);
+  } catch (err) {
+    if (!err.response) {
+      throw err;
+    }
+    return rejectWithValue(err.response);
+  }
+});
+export const fetchTodoAll = createAsyncThunk<
+  Array<TodoStateEntity>,
+  void,
+  AppThunkAPI
+>('todo/fetchTodoAll', async (_, {rejectWithValue}) => {
+  const api = new APIClient({});
+  try {
+    const response = await api.todoInstances();
+    return response.data.map(convertResponseToTodoStateEntity);
+  } catch (err) {
+    if (!err.response) {
+      throw err;
+    }
+    return rejectWithValue(err.response);
+  }
+});
+
+export const createTodo = createAsyncThunk<
+  TodoStateEntity,
+  {title: string; checked: boolean},
+  AppThunkAPI
+>(
   'todo/createTodo',
   async (
     {title, checked}: {title: string; checked: boolean},
@@ -66,7 +100,7 @@ export const createTodo = createAsyncThunk(
     const api = new APIClient({});
     try {
       const response = await api.todoCreate({title, checked});
-      return response.data;
+      return convertResponseToTodoStateEntity(response.data);
     } catch (err) {
       if (!err.response) {
         throw err;
@@ -76,7 +110,11 @@ export const createTodo = createAsyncThunk(
   }
 );
 
-export const updateTodo = createAsyncThunk(
+export const updateTodo = createAsyncThunk<
+  TodoStateEntity,
+  {id: string; title: string; checked: boolean},
+  AppThunkAPI
+>(
   'todo/updateTodo',
   async (
     {id, title, checked}: {id: string; title: string; checked: boolean},
@@ -85,7 +123,7 @@ export const updateTodo = createAsyncThunk(
     const api = new APIClient({});
     try {
       const response = await api.todoUpdate(id, {title, checked});
-      return response.data;
+      return convertResponseToTodoStateEntity(response.data);
     } catch (err) {
       if (!err.response) {
         throw err;
@@ -102,28 +140,18 @@ const todoSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchTodoById.fulfilled, (state, action) => {
-        state.items = state.items.map((item) => {
-          if (item.id === action.payload.id) {
-            return action.payload;
-          }
-          return item;
-        });
+        return todoAdapter.addOne(state, action.payload);
       })
       .addCase(updateTodo.fulfilled, (state, action) => {
-        state.items = state.items.map((item) => {
-          if (item.id === action.payload.id) {
-            return action.payload;
-          }
-          return item;
-        });
+        return todoAdapter.upsertOne(state, action.payload);
       })
       .addCase(fetchTodoAll.fulfilled, (state, action) => {
-        state.items == action.payload;
+        return todoAdapter.addMany(state, action.payload);
       })
       .addCase(createTodo.fulfilled, (state, action) => {
-        state.items.push(action.payload);
+        return todoAdapter.addOne(state, action.payload);
       });
   },
 });
-export const selectors = {selectTodoAll};
+export const selectors = {selectTodoAll, selectTodoById};
 export default todoSlice.reducer;

@@ -1,31 +1,66 @@
-import {APIClient} from '@infra/api/APIClient';
-import {createSlice, createAsyncThunk, createSelector} from '@reduxjs/toolkit';
+import {APIClient, AccessTokenResource} from '@infra/api/APIClient';
+import {
+  createSlice,
+  createAsyncThunk,
+  createSelector,
+  createEntityAdapter,
+} from '@reduxjs/toolkit';
 import {AsyncStorage} from 'react-native';
-import {RootState} from 'redux/rootReducer';
-import {AppThunkAPI} from 'redux/store';
+
+import {AccessToken, AccessTokenId} from '@domain/auth';
+
+import {RootState} from '../../../redux/rootReducer';
+import {AppThunkAPI} from '../../../redux/store';
 
 const ACCESS_TOKEN_STORE_KEY = 'auth/accessToken';
 
-type AccessTokenResponse = {
-  token: string;
+type AccessTokenEntity = {
+  id: string;
   expiresIn: number;
   createdAt: string;
 };
-interface AuthState {
-  accessToken: null | AccessTokenResponse;
-}
-const initialState: AuthState = {
-  accessToken: null,
+
+const createAccessToken = (entity: AccessTokenEntity): AccessToken => {
+  return new AccessToken({
+    createdAt: new Date(entity.createdAt),
+    expiresIn: entity.expiresIn,
+    id: new AccessTokenId(entity.id),
+  });
 };
+const convertAccessTokenEntity = ({
+  token,
+  ...response
+}: AccessTokenResource): AccessTokenEntity => {
+  return {...response, id: token};
+};
+const accessTokenAdapter = createEntityAdapter<AccessTokenEntity>();
+const initialState = accessTokenAdapter.getInitialState<{
+  currentId: string | null;
+}>({
+  currentId: null,
+});
+
+type AuthState = typeof initialState;
 
 const selectState = (state: RootState) => state.auth;
+const adapterSelectors = accessTokenAdapter.getSelectors(selectState);
+const selectOne = (state: RootState) => {
+  return (id: string) => {
+    const entity = adapterSelectors.selectById(state, id);
+    return entity ? createAccessToken(entity) : null;
+  };
+};
+const selectCurrentId = createSelector(selectState, (state) => state.currentId);
 const selectAccessToken = createSelector(
-  selectState,
-  (state) => state.accessToken
+  selectCurrentId,
+  selectOne,
+  (currentId, selecor) => {
+    return currentId && selecor(currentId);
+  }
 );
 
 export const login = createAsyncThunk<
-  AccessTokenResponse,
+  AccessTokenEntity,
   {username: string; password: string},
   AppThunkAPI
 >(
@@ -37,11 +72,12 @@ export const login = createAsyncThunk<
     const api = new APIClient({});
     try {
       const response = await api.login({username, password});
+      const entity = convertAccessTokenEntity(response.data);
       await AsyncStorage.setItem(
         ACCESS_TOKEN_STORE_KEY,
-        JSON.stringify(response)
+        JSON.stringify(entity)
       );
-      return response.data;
+      return entity;
     } catch (err) {
       if (!err.response) {
         throw err;
@@ -69,12 +105,12 @@ export const logout = createAsyncThunk<void, {token: string}, AppThunkAPI>(
 );
 
 export const loadAccessToken = createAsyncThunk<
-  AccessTokenResponse | null,
+  AccessTokenEntity | null,
   void,
   AppThunkAPI
 >('auth/loadAccessToken', async () => {
   const accessToken = await AsyncStorage.getItem(ACCESS_TOKEN_STORE_KEY);
-  return accessToken ? (JSON.parse(accessToken) as AccessTokenResponse) : null;
+  return accessToken ? (JSON.parse(accessToken) as AccessTokenEntity) : null;
 });
 
 const account = createSlice({
@@ -84,13 +120,20 @@ const account = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(login.fulfilled, (state, action) => {
-        state.accessToken = action.payload;
+        state.currentId = action.payload.id;
+        return accessTokenAdapter.addOne(state, action.payload);
       })
-      .addCase(logout.fulfilled, (state) => {
-        state.accessToken = null;
+      .addCase(logout.fulfilled, (state, action) => {
+        const {token} = action.meta.arg;
+        state.currentId = null;
+        return accessTokenAdapter.removeOne(state, token);
       })
       .addCase(loadAccessToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload;
+        if (action.payload) {
+          state.currentId = action.payload.id;
+          return accessTokenAdapter.addOne(state, action.payload);
+        }
+        state.currentId = null;
       });
   },
 });
