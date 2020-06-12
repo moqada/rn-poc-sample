@@ -38,7 +38,7 @@ const DUMMY_USER = {
   birthday: '2000-01-02',
 };
 const DUMMY_TODOS = [];
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < 3; i++) {
   DUMMY_TODOS.push({
     id: `a-${i}`,
     title: `おこめたべる ${i}`,

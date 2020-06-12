@@ -42,9 +42,7 @@ const convertStateEntityToTodoEntity = (entity: TodoStateEntity): Todo => {
 const performSelectAll = (state) => {
   const before = performance.now();
   const ret = adapterSelectors.selectAll(state);
-  // const ret = adapterSelectors
-  //   .selectAll(state)
-  //   .map(convertStateEntityToTodoEntity);
+  // const ret = adapterSelectors.selectAll(state).map(selectEntity);
   console.log('peprformSelectAll', performance.now() - before);
   return ret;
 };
@@ -62,7 +60,7 @@ const selectTodoById = createSelector(
   (state: TodoState, id: string) => {
     console.log('call selectTodoById', id);
     const entity = adapterSelectors.selectById(state, id);
-    return entity && convertStateEntityToTodoEntity(entity);
+    return entity && selectEntity(entity);
   }
 );
 

@@ -43,14 +43,16 @@ const ConnectedHomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // const mappedTodos = useMemo(() => {
-  //   console.log('mapping');
-  //   return todos.map((entity) => ({
+  //   const before = performance.now();
+  //   const mapped = todos.map((entity) => ({
   //     id: entity.id.value,
   //     title: entity.title.value,
   //     checked: entity.checked,
   //     updatedAt: entity.updatedAt,
   //     createdAt: entity.createdAt,
   //   }));
+  //   console.log('peprformMap', performance.now() - before);
+  //   return mapped;
   // }, [todos]);
   return user ? (
     <HomePage
