@@ -21,3 +21,14 @@ export class ProjectRepository implements IProjectRepository {
     return todoSelectors.selectProjectById(state, id);
   }
 }
+
+export const createProjectRepository = (): IProjectRepository => {
+  // TODO
+  const { dispatch, getState } = ReduxProvider.create();
+  return {
+    getById: async (id) => todoSelectors.selectProjectById(getState(), id),
+    save: async (project: Project) =>
+      dispatch(todoActions.projectSaved(project)),
+    saveList: async (projects: Project[]) => console.log('TODO', projects),
+  };
+};

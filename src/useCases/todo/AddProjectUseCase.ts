@@ -1,4 +1,7 @@
-import { ProjectRepository } from '../../adapters/domain/todo/ProjectRepository';
+import {
+  createProjectRepository,
+  ProjectRepository,
+} from '../../adapters/domain/todo/ProjectRepository';
 import { ProjectResource } from '../../adapters/domain/todo/ProjectResource';
 import { Indicator } from '../../adapters/services/indicator/Indicator';
 import { Navigator } from '../../adapters/services/navigation/Navigator';
@@ -17,7 +20,8 @@ type Arg = { title: TodoTitle };
 export class AddProjectFatUseCase extends UseCase<Arg> {
   static create() {
     return new AddProjectFatUseCase(
-      ProjectRepository.create(),
+      // ProjectRepository.create(),
+      createProjectRepository(),
       ProjectResource.create(),
       Navigator.create(),
       Indicator
