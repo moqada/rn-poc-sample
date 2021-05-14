@@ -1,6 +1,6 @@
-import { IProjectRepository, Project, ProjectId } from '../../../domain/todo';
-import { ReduxProvider } from '../../../lib/redux/ReduxProvider';
-import { todoActions, todoSelectors } from './redux/todoSlice';
+import {IProjectRepository, Project, ProjectId} from '../../../domain/todo';
+import {ReduxProvider} from '../../../lib/redux/ReduxProvider';
+import {todoActions, todoSelectors} from './redux/todoSlice';
 
 export class ProjectRepository implements IProjectRepository {
   static create() {
@@ -24,11 +24,12 @@ export class ProjectRepository implements IProjectRepository {
 
 export const createProjectRepository = (): IProjectRepository => {
   // TODO
-  const { dispatch, getState } = ReduxProvider.create();
+  const {dispatch, getState} = ReduxProvider.create();
   return {
     getById: async (id) => todoSelectors.selectProjectById(getState(), id),
-    save: async (project: Project) =>
-      dispatch(todoActions.projectSaved(project)),
+    save: async (project: Project) => {
+      dispatch(todoActions.projectSaved(project));
+    },
     saveList: async (projects: Project[]) => console.log('TODO', projects),
   };
 };

@@ -1,23 +1,23 @@
-import { mock, MockProxy } from 'jest-mock-extended';
+import {mock, MockProxy} from 'jest-mock-extended';
 import {
   IProjectRepository,
-  IProjectResource,
+  IProjectApiGateway,
   Project,
   TodoTitle,
 } from '../../../domain/todo';
-import { IIndicator } from '../../../services/indicator';
-import { INavigator } from '../../../services/navigation';
-import { AddProjectFatUseCase as AddProjectUseCase } from '../AddProjectUseCase';
+import {IIndicator} from '../../../adapters/services/indicator';
+import {INavigator} from '../../../adapters/services/navigation';
+import {AddProjectUseCase} from '../AddProjectUseCase';
 
 describe('AddProjectUseCase', () => {
   let mockRepo: MockProxy<IProjectRepository>;
-  let mockRes: MockProxy<IProjectResource>;
+  let mockApiGateway: MockProxy<IProjectApiGateway>;
   let mockNav: MockProxy<INavigator>;
   let mockIndicator: MockProxy<IIndicator>;
 
   beforeEach(() => {
     mockRepo = mock<IProjectRepository>();
-    mockRes = mock<IProjectResource>();
+    mockApiGateway = mock<IProjectApiGateway>();
     mockNav = mock<INavigator>();
     mockIndicator = mock<IIndicator>();
   });
@@ -29,19 +29,19 @@ describe('AddProjectUseCase', () => {
       title: 'hoge',
       updatedAt: new Date(),
     });
-    mockRes.create.mockResolvedValue(pj);
+    mockApiGateway.create.mockResolvedValue(pj);
     const useCase = new AddProjectUseCase(
       mockRepo,
-      mockRes,
+      mockApiGateway,
       mockNav,
       mockIndicator
     );
     const title = TodoTitle.create('hoge');
-    await useCase.execute({ title });
+    await useCase.execute({title});
     expect(mockIndicator.show).toBeCalledWith();
-    expect(mockRes.create).toBeCalledWith({ title });
+    expect(mockApiGateway.create).toBeCalledWith({title});
     expect(mockRepo.save).toBeCalledWith(pj);
-    expect(mockNav.navigate).toBeCalledWith('ProjectDetail', { id: 'hoge' });
+    expect(mockNav.navigate).toBeCalledWith('ProjectDetail', {id: 'hoge'});
     expect(mockIndicator.hide).toBeCalledWith();
   });
 });

@@ -1,5 +1,10 @@
-import { NavigationContainerRef, StackActions } from '@react-navigation/native';
-import { INavigator } from '../../../services/navigation';
+import {NavigationContainerRef, StackActions} from '@react-navigation/native';
+
+export interface INavigator {
+  navigate(name: string, params?: {[key: string]: unknown}): void;
+  push(name: string, params?: {[key: string]: unknown}): void;
+  pop(): void;
+}
 
 export class Navigator implements INavigator {
   private static instance: Navigator;
@@ -16,7 +21,7 @@ export class Navigator implements INavigator {
     ref && (this.navigationRef = ref);
   }
 
-  navigate(name: string, params?: { [key: string]: unknown }) {
+  navigate(name: string, params?: {[key: string]: unknown}) {
     this.navigationRef?.navigate(name, params);
   }
 
