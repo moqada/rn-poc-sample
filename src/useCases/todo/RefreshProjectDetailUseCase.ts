@@ -1,19 +1,19 @@
 import {
   IProjectRepository,
-  IProjectResource,
+  IProjectApiGateway,
   ITodoItemRepository,
-  ITodoItemResource,
+  ITodoItemApiGateway,
   ProjectId,
 } from '../../domain/todo';
 
 export class RefreshProjectDetailUseCase {
   constructor(
-    private todoItemResource: ITodoItemResource,
+    private todoItemResource: ITodoItemApiGateway,
     private projectRepository: IProjectRepository,
     private todoItemRepository: ITodoItemRepository,
-    private projectResource: IProjectResource
+    private projectResource: IProjectApiGateway
   ) {}
-  async execute({ projectId }: { projectId: ProjectId }): Promise<void> {
+  async execute({projectId}: {projectId: ProjectId}): Promise<void> {
     const items = await this.todoItemResource.getListByProjectId(projectId);
     const project = await this.projectResource.getById(projectId);
     await this.projectRepository.save(project);

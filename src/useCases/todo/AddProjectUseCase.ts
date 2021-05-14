@@ -5,7 +5,6 @@ import {INavigator, Navigator} from '../../adapters/services/navigation';
 import {
   IProjectRepository,
   IProjectApiGateway,
-  Project,
   TodoTitle,
 } from '../../domain/todo';
 import {UseCase} from '../../lib/useCase';

@@ -1,11 +1,10 @@
-import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import memoize from 'lodash.memoize';
-import { Project, TodoItem } from '../../../../domain/todo';
-import { RootState } from '../../../../lib/redux/rootReducer';
+import {createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {Project, TodoItem} from '../../../../domain/todo';
+import {RootState} from '../../../../lib/redux/rootReducer';
 
 type TodoState = {
-  items: { [key: string]: TodoItem };
-  projects: { [key: string]: Project };
+  items: {[key: string]: TodoItem};
+  projects: {[key: string]: Project};
 };
 const p = Project.create({
   createdAt: new Date(),
@@ -13,7 +12,7 @@ const p = Project.create({
   title: 'Inbox',
   updatedAt: new Date(),
 });
-const initialState: TodoState = { items: {}, projects: { p } };
+const initialState: TodoState = {items: {}, projects: {p}};
 const todoSlice = createSlice({
   initialState,
   name: 'todo',
